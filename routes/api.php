@@ -17,6 +17,5 @@ Route::prefix('v1')->group(function () {
         Route::get('/logout', [AuthController::class, 'logout']);
         Route::get('/tes', [TestController::class, 'tes']);
 
-
     });
 });

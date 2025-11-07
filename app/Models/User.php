@@ -48,4 +48,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function canAccessPanel(): bool
+    {
+        return $this->hasRole('Super Admin');
+    }
 }
