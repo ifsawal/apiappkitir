@@ -11,6 +11,10 @@ use App\Models\KitirPenjualan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/test', function() {
+    return response()->json(['status' => 'OK']);
+});
+
 Route::prefix('v1')->group(function () {
 
 
