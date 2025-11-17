@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\Api\v1\Auth\AuthController;
-use App\Http\Controllers\Api\v1\Kitir\KitirController;
-use App\Http\Controllers\Api\v1\Kitir\Penjualan;
-use App\Http\Controllers\Api\v1\Kitir\PenjualanController;
-use App\Http\Controllers\Api\v1\Pangkalan\KController;
+use App\Http\Controllers\api\v1\Auth\AuthController;
+use App\Http\Controllers\api\v1\Kitir\KitirController;
+use App\Http\Controllers\api\v1\Kitir\Penjualan;
+use App\Http\Controllers\api\v1\Kitir\PenjualanController;
+use App\Http\Controllers\api\v1\Pangkalan\KController;
 use App\Http\Controllers\api\v1\TestController;
 use App\Models\Kitir;
 use App\Models\KitirPenjualan;
