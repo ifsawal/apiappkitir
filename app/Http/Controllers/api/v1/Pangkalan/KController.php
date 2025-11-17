@@ -14,7 +14,7 @@ class KController extends Controller
     public function ktp()
     {
         $user = Auth::user();
-        $ktp = Ktp::where('id_pang', $user->id)->get();
+        $ktp = Ktp::where('id_pang', $user->pangkalan_id)->get();
 
 
         return response()->json([
@@ -39,12 +39,12 @@ class KController extends Controller
                 $parts[0] = trim($parts[0]);
                 $parts[1] = trim($parts[1]); //hapus spasi
 
-                $cek = Ktp::where('id_pang', $user->id)->where('ktp', $parts[0])->first();
+                $cek = Ktp::where('id_pang', $user->pangkalan_id)->where('ktp', $parts[0])->first();
                 if ($cek) {
                     continue;
                 }
                 $ktp = new Ktp();
-                $ktp->id_pang = $user->id;
+                $ktp->id_pang = $user->pangkalan_id;
                 $ktp->ktp = $parts[0];
                 $ktp->nama = $parts[1];
                 $ktp->save();
