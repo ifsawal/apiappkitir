@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\Pangkalan;
+namespace App\Http\Controllers\api\v1\Pangkalan;
 
 use App\Models\Ktp;
 use DeepCopy\f002\A;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\Kitir;
+namespace App\Http\Controllers\api\v1\Kitir;
 
 
 use Illuminate\Support\Facades\DB;
