@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Pangkalan2;
 
 return [
 
@@ -46,6 +47,11 @@ return [
             'driver' => 'session',
             'provider' => 'api',
         ],
+
+        'pangkalan2' => [
+            'driver' => 'session',
+            'provider' => 'pangkalan2',
+        ],
     ],
 
     /*
@@ -74,6 +80,11 @@ return [
         'api' => [
             'driver' => 'eloquent',
             'model' => User::class,
+        ],
+
+        'pangkalan2' => [ // ✅ provider baru
+            'driver' => 'eloquent',
+            'model' => Pangkalan2::class,
         ],
     ],
 

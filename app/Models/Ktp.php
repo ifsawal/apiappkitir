@@ -7,4 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class Ktp extends Model
 {
     protected $table = 'ktp';
+    public $timestamps = false;
 }
