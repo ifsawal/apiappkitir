@@ -1,15 +1,16 @@
 <?php
 
+use App\Models\Kitir;
+use Illuminate\Http\Request;
+use App\Models\KitirPenjualan;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\api\v1\TestController;
+use App\Http\Controllers\api\v1\Kitir\Penjualan;
 use App\Http\Controllers\api\v1\Auth\AuthController;
 use App\Http\Controllers\api\v1\Kitir\KitirController;
-use App\Http\Controllers\api\v1\Kitir\Penjualan;
-use App\Http\Controllers\api\v1\Kitir\PenjualanController;
 use App\Http\Controllers\api\v1\Pangkalan\KController;
-use App\Http\Controllers\api\v1\TestController;
-use App\Models\Kitir;
-use App\Models\KitirPenjualan;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\api\v1\Kitir\PenjualanController;
+use App\Http\Controllers\Api\v1\Pangkalan\TransaksiController;
 
 Route::get('/test', function() {
     return response()->json(['status' => 'OK']);
@@ -39,6 +40,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/logout-pangkalan', [AuthController::class, 'logout_pangkalan']);
         Route::get('/k', [KController::class, 'ktp']);
         Route::post('/k', [KController::class, 'simpan_k']);
+
+        Route::get('/transaksi/{bulan}/{tahun}', [TransaksiController::class, 'getTransaksi']);
 
     });
 });

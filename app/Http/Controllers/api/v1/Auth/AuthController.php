@@ -45,17 +45,26 @@ class AuthController extends Controller
                     'id_reg' => $pangkalan->id_sim,
                     'briva' => $pangkalan->no_briva,
                     'link_map' => "https://subsiditepatlpg.mypertamina.id/merchant-login",  //link login merchant
+                    'link_beranda' => "https://subsiditepatlpg.mypertamina.id/merchant/app",  //link login merchant
                     'link_nama_ktp' => "https://subsiditepatlpg.mypertamina.id/merchant/app/sale",  //link muncul nama pelanggan
                     'email' => $pangkalan->email,
                     'pin' => $pangkalan->pin,
 
                     //script klik catat penjualan
                     'klik_catat' => 'var el = Array.from(document.querySelectorAll(\'div\'))     .find(e => e.innerText.trim() === "Catat Penjualan");  if (el) {     el.click(); }',
-
+                    'lanjut_penjualan' => 'var btn = document.querySelector(\'[data-testid="btnCheckNik"]\'); if (btn) {     btn.click(); }',
                     //script masukkan NIK ke input
                     'masuk_nik' => 'function setReactValue(el, value) {     const setter = Object.getOwnPropertyDescriptor(el.__proto__, "value").set;     setter.call(el, value);     el.dispatchEvent(new Event("input", { bubbles: true }));     el.dispatchEvent(new Event("change", { bubbles: true })); }  var nikInput = document.querySelector(\'input[placeholder="Masukkan 16 digit NIK Pelanggan"]\');  if (nikInput) {     setReactValue(nikInput, "',
                     'masuk_nik2' => '"); }',
 
+                    'cek_pesanan' => 'var btn = document.querySelector(\'[data-testid="btnCheckOrder"]\'); if (btn) {     btn.click(); }',
+                    'proses_penjualan' => 'var btn = document.querySelector(\'[data-testid="btnPay"]\'); if (btn) {     btn.click(); }',
+
+                    'kembali_utama' => 'var links = Array.from(document.querySelectorAll(\'a\'));
+var link = links.find(l => l.textContent.trim() === "KEMBALI KE HALAMAN UTAMA");
+if (link) {
+    link.click();
+}',
                     //proses isi username dan pin dan klik tombol masuk
                     'j1' => 'function setReactInputValue(el, value) {
     const setter = Object.getOwnPropertyDescriptor(el.__proto__, \'value\').set;
