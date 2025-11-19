@@ -10,6 +10,7 @@ use App\Http\Controllers\api\v1\Auth\AuthController;
 use App\Http\Controllers\api\v1\Kitir\KitirController;
 use App\Http\Controllers\api\v1\Pangkalan\KController;
 use App\Http\Controllers\api\v1\Kitir\PenjualanController;
+use App\Http\Controllers\api\v1\Kitir\Simelon\SimelonDataController;
 use App\Http\Controllers\Api\v1\Pangkalan\TransaksiController;
 
 Route::get('/test', function() {
@@ -34,6 +35,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/jual', [KitirController::class, 'jual']);
         Route::post('/jual-tambah', [KitirController::class, 'jual_tambah']);
         Route::get('/penjualan', [PenjualanController::class, 'penjualan']);
+
+        Route::get('/simelon-data', [SimelonDataController::class, 'simelon_data']);
     });
 
     Route::middleware(['auth:sanctum', 'abilities:pangkalan2'])->group(function () {
