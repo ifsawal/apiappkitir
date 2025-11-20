@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\v1\TestController;
 use App\Http\Controllers\api\v1\Kitir\Penjualan;
 use App\Http\Controllers\api\v1\Auth\AuthController;
+use App\Http\Controllers\api\v1\Kitir\DataPangkalanController;
 use App\Http\Controllers\api\v1\Kitir\KitirController;
 use App\Http\Controllers\api\v1\Pangkalan\KController;
 use App\Http\Controllers\api\v1\Kitir\PenjualanController;
@@ -37,6 +38,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/penjualan', [PenjualanController::class, 'penjualan']);
 
         Route::get('/simelon-data', [SimelonDataController::class, 'simelon_data']);
+        Route::get('/data-pangkalan/{cari?}', [DataPangkalanController::class, 'getPangkalan']);
     });
 
     Route::middleware(['auth:sanctum', 'abilities:pangkalan2'])->group(function () {
