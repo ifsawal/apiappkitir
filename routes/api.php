@@ -12,7 +12,7 @@ use App\Http\Controllers\api\v1\Kitir\KitirController;
 use App\Http\Controllers\api\v1\Pangkalan\KController;
 use App\Http\Controllers\api\v1\Kitir\PenjualanController;
 use App\Http\Controllers\api\v1\Kitir\Simelon\SimelonDataController;
-use App\Http\Controllers\Api\v1\Pangkalan\TransaksiController;
+use App\Http\Controllers\api\v1\Pangkalan\TransaksiController;
 
 Route::get('/test', function() {
     return response()->json(['status' => 'OK']);
