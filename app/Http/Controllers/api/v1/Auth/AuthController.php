@@ -43,7 +43,7 @@ class AuthController extends Controller
                 'detil' => [
                     'nama' => $pangkalan->nama,
                     'id_reg' => $pangkalan->id_sim,
-                    'briva' => $pangkalan->no_briva,
+                    'briva' => 'Briva 13489'.$pangkalan->no_briva,
                     'link_map' => "https://subsiditepatlpg.mypertamina.id/merchant-login",  //link login merchant
                     'link_beranda' => "https://subsiditepatlpg.mypertamina.id/merchant/app",  //link login merchant
                     'link_nama_ktp' => "https://subsiditepatlpg.mypertamina.id/merchant/app/sale",  //link muncul nama pelanggan
