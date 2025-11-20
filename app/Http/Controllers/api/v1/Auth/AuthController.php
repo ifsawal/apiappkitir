@@ -65,6 +65,7 @@ var link = links.find(l => l.textContent.trim() === "KEMBALI KE HALAMAN UTAMA");
 if (link) {
     link.click();
 }',
+                    'tekan_back' => 'document.querySelector(\'[data-testid="btnChangeBuyer"]\').click();',
                     //proses isi username dan pin dan klik tombol masuk
                     'j1' => 'function setReactInputValue(el, value) {
     const setter = Object.getOwnPropertyDescriptor(el.__proto__, \'value\').set;

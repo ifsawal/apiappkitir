@@ -18,6 +18,7 @@ class TransaksiController extends Controller
             ->where('id_pang', $user->pangkalan_id)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
+            ->orderBy('id', 'desc')
             ->get();
 
         return response()->json([
