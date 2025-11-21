@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\v1\Auth\PangkalanResource;
+use App\Models\OnesignalLogin;
 use App\Models\Pangkalan;
 use App\Models\Pangkalan2;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +35,14 @@ class AuthController extends Controller
 
         $pangkalan = Pangkalan::where('id_pang', $user->pangkalan_id)->first();
         // $pangkalan = Pangkalan2::where('email', $r->email)->first();
+        if (isset($r->player_id)) {
+            $one = new OnesignalLogin();
+            $one->user_id = $user->id;
+            $one->player_id = $r->player_id;
+            $one->model = Pangkalan2::class;
+            $one->save();
+        }
+
         $token = $user->createToken('auth_token', ['pangkalan2'])->plainTextToken;
         return response()
             ->json([
@@ -43,7 +52,7 @@ class AuthController extends Controller
                 'detil' => [
                     'nama' => $pangkalan->nama,
                     'id_reg' => $pangkalan->id_sim,
-                    'briva' => 'Briva '.config('app.briva').$pangkalan->no_briva,
+                    'briva' => 'Briva ' . config('app.briva') . $pangkalan->no_briva,
                     'link_map' => "https://subsiditepatlpg.mypertamina.id/merchant-login",  //link login merchant
                     'link_beranda' => "https://subsiditepatlpg.mypertamina.id/merchant/app",  //link login merchant
                     'link_nama_ktp' => "https://subsiditepatlpg.mypertamina.id/merchant/app/sale",  //link muncul nama pelanggan
@@ -132,6 +141,14 @@ if (btn) {
         $pangkalan = Pangkalan::all();
         $a = PangkalanResource::collection($pangkalan);
 
+        if (isset($r->player_id)) {
+            $one = new OnesignalLogin();
+            $one->user_id = $user->id;
+            $one->player_id = $r->player_id;
+            $one->model = User::class;
+            $one->save();
+        }
+
         $token = $user->createToken('auth_token', ['admin'])->plainTextToken;
         return response()
             ->json([
@@ -149,6 +166,11 @@ if (btn) {
     public function logout()
     {
 
+        $user = Auth::user();
+        OnesignalLogin::where('user_id', $user->id)//di abaykan jika data.a tidak ada
+            ->where('model', User::class)
+            ->delete();
+
         Auth::user()->tokens()->delete();
         return response()
             ->json([
@@ -159,6 +181,11 @@ if (btn) {
 
     public function logout_pangkalan()
     {
+        $user = Auth::user();
+        OnesignalLogin::where('user_id', $user->id)
+            ->where('model', Pangkalan2::class)
+            ->delete();
+
         Auth::user()->tokens()->delete();
         return response()
             ->json([
