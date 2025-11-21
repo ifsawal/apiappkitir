@@ -37,3 +37,4 @@ return Application::configure(basePath: dirname(__DIR__))
             ], $e->status);
         });
     })->create();
+    date_default_timezone_set('Asia/Jakarta');
