@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\v1\TestController;
 use App\Http\Controllers\api\v1\Kitir\Penjualan;
 use App\Http\Controllers\api\v1\Auth\AuthController;
+use App\Http\Controllers\api\v1\Auth\OnesignalController;
 use App\Http\Controllers\api\v1\Kitir\DataPangkalanController;
 use App\Http\Controllers\api\v1\Kitir\KitirController;
 use App\Http\Controllers\api\v1\Pangkalan\KController;
@@ -25,28 +26,33 @@ Route::prefix('v1')->group(function () {
 
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/login-pangkalan', [AuthController::class, 'login_pangkalan']);
-
-
+    
+    
     Route::middleware(['auth:sanctum', 'abilities:admin'])->group(function () {
         Route::get('/logout', [AuthController::class, 'logout']);
         Route::get('/tes', [TestController::class, 'tes']);
-
-
+        
+        
         Route::get('/kitir/{tanggal}', [KitirController::class, 'kitir']);
         Route::post('/jual', [KitirController::class, 'jual']);
         Route::post('/jual-tambah', [KitirController::class, 'jual_tambah']);
         Route::get('/penjualan', [PenjualanController::class, 'penjualan']);
-
+        
         Route::get('/simelon-data', [SimelonDataController::class, 'simelon_data']);
         Route::get('/data-pangkalan/{cari?}', [DataPangkalanController::class, 'getPangkalan']);
     });
-
+    
     Route::middleware(['auth:sanctum', 'abilities:pangkalan2'])->group(function () {
         Route::get('/logout-pangkalan', [AuthController::class, 'logout_pangkalan']);
         Route::get('/k', [KController::class, 'ktp']);
         Route::post('/k', [KController::class, 'simpan_k']);
-
+        
         Route::get('/transaksi/{bulan}/{tahun}', [TransaksiController::class, 'getTransaksi']);
-
+        
     });
+
+
+    Route::post('/onesig', [OnesignalController::class, 'simpan_player']);
+
+
 });
