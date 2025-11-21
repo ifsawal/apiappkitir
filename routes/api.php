@@ -53,6 +53,7 @@ Route::prefix('v1')->group(function () {
 
 
     Route::post('/onesig', [OnesignalController::class, 'simpan_player']);
+    Route::get('/waktu', [OnesignalController::class, 'waktu']);
 
 
 });

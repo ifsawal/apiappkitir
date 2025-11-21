@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\v1\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Onesignal;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class OnesignalController extends Controller
@@ -24,6 +25,16 @@ class OnesignalController extends Controller
             ->json([
                 'sukses' => true,
                 'pesan' => "Terdaftar",
+            ], 201);
+    }
+
+    public function waktu(){
+        
+        return response()
+            ->json([
+                'sukses' => true,
+                'waktu' => date('Y-m-d H:i:s'),
+                'waktu2' => Carbon::now(),
             ], 201);
     }
 }
