@@ -35,10 +35,10 @@ class AuthController extends Controller
 
         $pangkalan = Pangkalan::where('id_pang', $user->pangkalan_id)->first();
         // $pangkalan = Pangkalan2::where('email', $r->email)->first();
-        if (isset($r->player_id)) {
+        if (isset($request->player_id)) {
             $one = new OnesignalLogin();
             $one->user_id = $user->id;
-            $one->player_id = $r->player_id;
+            $one->player_id = $request->player_id;
             $one->model = Pangkalan2::class;
             $one->save();
         }
@@ -141,10 +141,10 @@ if (btn) {
         $pangkalan = Pangkalan::all();
         $a = PangkalanResource::collection($pangkalan);
 
-        if (isset($r->player_id)) {
+        if (isset($request->player_id)) {
             $one = new OnesignalLogin();
             $one->user_id = $user->id;
-            $one->player_id = $r->player_id;
+            $one->player_id = $request->player_id;
             $one->model = User::class;
             $one->save();
         }
