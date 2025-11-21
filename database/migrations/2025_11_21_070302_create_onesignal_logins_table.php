@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('onesignal_logins', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict')->onUpdate('cascade');
+            $table->BigInteger('user_id')->nullable();
             $table->string('player_id')->nullable();
             $table->string('model')->nullable();
             $table->string('type')->nullable();
