@@ -13,6 +13,7 @@ use App\Http\Controllers\api\v1\Kitir\KitirController;
 use App\Http\Controllers\api\v1\Pangkalan\KController;
 use App\Http\Controllers\api\v1\Kitir\PenjualanController;
 use App\Http\Controllers\api\v1\Kitir\Simelon\SimelonDataController;
+use App\Http\Controllers\api\v1\Pangkalan\DasboardController;
 use App\Http\Controllers\api\v1\Pangkalan\TransaksiController;
 
 Route::get('/test', function() {
@@ -46,6 +47,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/logout-pangkalan', [AuthController::class, 'logout_pangkalan']);
         Route::get('/k', [KController::class, 'ktp']);
         Route::post('/k', [KController::class, 'simpan_k']);
+
+        Route::get('/dasboard', [DasboardController::class, 'index']);
         
         Route::get('/transaksi/{bulan}/{tahun}', [TransaksiController::class, 'getTransaksi']);
         
