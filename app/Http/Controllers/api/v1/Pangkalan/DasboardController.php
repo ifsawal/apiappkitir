@@ -19,6 +19,7 @@ class DasboardController extends Controller
             ->json([
                 'sukses' => true,
                 'pesan' => "akses sukses",
+                'akses_iklan' => "setiap_waktu--",
                 'tanggal' => date("Y-m-d"),
                 'gambar'=> [
                     "https://api.appkitir.com/gambar/Aplikasi-Kitir-V-1.jpg",
