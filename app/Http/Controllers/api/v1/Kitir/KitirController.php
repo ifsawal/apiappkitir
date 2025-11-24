@@ -123,14 +123,60 @@ class KitirController extends Controller
 
     public function jual_tambah(Request $r)
     {
-        return $user = Auth::user();
+        $user = Auth::user();
+
 
         $r->validate([
+            'id_penjualan' => 'required|numeric|exists:kitir_penjualan,id',
             'id_k' => 'required|numeric',
             'id_pang' => 'required|numeric',
             'jumlah' => 'required|numeric',
         ]);
 
-       
+
+        $cek = KitirPenjualan::findOrFail($r->id_penjualan);
+        if ($cek->user_id_u != $user->id_u) {
+            return response()->json([
+                'status' => false,
+                'pesan' => "Yang menambahkan harus akun yang sama dengan penjualan...",
+            ], 422);
+        }
+
+        $pecah= KitirPecah::where('kitir_penjualan_id', $r->id_penjualan)->where('id_k', $r->id_k)->first();
+        if ($pecah) {
+            return response()->json([
+                'status' => false,
+                'pesan' => "Kekurangan harus di ambil dari kitir yang lain, atau di rubah...",
+            ], 422);
+        }
+
+        $otal = $cek->jumlah + $r->jumlah;
+        $seting = Seting::where('nama', 'harga_lpg3kg')->first();
+
+        try {
+            DB::beginTransaction();
+            $kitir_pecah = new KitirPecah();
+            $kitir_pecah->id_k = $r->id_k;
+            $kitir_pecah->kitir_penjualan_id = $r->id_penjualan;
+            $kitir_pecah->jumlah = $r->jumlah;
+            $kitir_pecah->save();
+
+            $cek->jumlah = $otal;
+            $cek->harga = $cek->harga + ($seting->nilai * $r->jumlah);
+            $cek->save();
+
+            // DB::rollBack();
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'pesan' => "Data berhasil disimpan...",
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'pesan' => "Data gagal disimpan. " . $e->getMessage(),
+            ], 500);
+        }
     }
 }

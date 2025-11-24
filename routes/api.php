@@ -10,6 +10,7 @@ use App\Http\Controllers\api\v1\Auth\AuthController;
 use App\Http\Controllers\api\v1\Auth\OnesignalController;
 use App\Http\Controllers\api\v1\Kitir\DataPangkalanController;
 use App\Http\Controllers\api\v1\Kitir\KitirController;
+use App\Http\Controllers\api\v1\Kitir\MapAgenController;
 use App\Http\Controllers\api\v1\Pangkalan\KController;
 use App\Http\Controllers\api\v1\Kitir\PenjualanController;
 use App\Http\Controllers\api\v1\Kitir\Simelon\SimelonDataController;
@@ -41,6 +42,7 @@ Route::prefix('v1')->group(function () {
         
         Route::get('/simelon-data', [SimelonDataController::class, 'simelon_data']);
         Route::get('/data-pangkalan/{cari?}', [DataPangkalanController::class, 'getPangkalan']);
+        Route::get('/map-agen/{id}', [MapAgenController::class, 'script']);
     });
     
     Route::middleware(['auth:sanctum', 'abilities:pangkalan2'])->group(function () {
