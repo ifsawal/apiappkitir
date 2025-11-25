@@ -14,14 +14,17 @@ class ProsesAkunController extends Controller
     {
         // Cari token berdasarkan user ID
         $user = Auth::user();
-        if ($user->id == $r->id) {
+        $token = $user->currentAccessToken();
+        $tokenableType = $token->tokenable_type;
+
+        if ($user->id == $r->id && $tokenableType == $r->type) {
             return response()->json([
                 'sukses' => false,
                 'pesan' => 'Tidak dapat mengeluarkan akun sendiri.',
             ], 400);
         }
 
-        $hap=PersonalAccessToken::where('tokenable_type', 'App\\Models\\User')
+        $hap = PersonalAccessToken::where('tokenable_type', $r->type)
             ->where('tokenable_id', $r->id)
             ->delete();
 

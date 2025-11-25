@@ -26,7 +26,7 @@ class DataController extends Controller
         return response()->json([
             'sukses' => true,
             'data' => $user,
-        ],202);
+        ], 202);
     }
 
     public function role(Request $request)
@@ -38,7 +38,7 @@ class DataController extends Controller
         return response()->json([
             'sukses' => true,
             'data' => $roles,
-        ],202);
+        ], 202);
     }
 
     public function permisi(Request $request)
@@ -46,27 +46,39 @@ class DataController extends Controller
         $permissions = Permission::with([
             'roles:id,name,guard_name',
             'user:id,name,email',
-        ])->orderBy('id', 'desc') ->get(['id', 'name', 'guard_name']);
+        ])->orderBy('id', 'desc')->get(['id', 'name', 'guard_name']);
         return response()->json([
             'sukses' => true,
             'data' => $permissions,
-        ],202);
+        ], 202);
     }
 
     public function data_user_aktif(Request $request)
     {
         // Ambil semua token aktif beserta user-nya
-    $tokens = PersonalAccessToken::with('tokenable')
-        ->where('tokenable_type', '=', 'App\\Models\\User') // hanya untuk model User
-        ->whereNotNull('token')
-        ->get(['id', 'tokenable_id', 'tokenable_type', 'name', 'last_used_at', 'created_at']);
+        $tokens = PersonalAccessToken::with('tokenable')
+            ->whereNotNull('token')
+            ->get();
 
-        // Ambil hanya data user unik
-        $users = $tokens->pluck('tokenable')->unique('id')->values();
+        // Group per user (tokenable_type + tokenable_id)
+        $data = $tokens
+            ->groupBy(function ($token) {
+                return $token->tokenable_type . '-' . $token->tokenable_id;
+            })
+            ->map(function ($group) {
+                $token = $group->first(); // ambil 1 token saja milik user itu
+                return [
+                    'tokenable_type' => $token->tokenable_type,
+                    'last_used_at'   => $token->last_used_at,
+                    'total_tokens'   => $group->count(), // opsional
+                    'user'     => $token->tokenable ? $token->tokenable->toArray() : null,
+                ];
+            })
+            ->values();
 
         return response()->json([
             'sukses' => true,
-            'data' => $users,
-        ],202);
+            'data' => $data,
+        ], 202);
     }
 }
