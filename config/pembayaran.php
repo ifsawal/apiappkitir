@@ -3,7 +3,8 @@
 return [
     'base_url' => env('BRI_BASE_URL'),
     'client_id' => env('X_CLIENT_KEY'),
-    'private_key_bri' => env('BRI_PRIVATE_KEY_PATH'),
+    // 'private_key_bri' => env('BRI_PRIVATE_KEY_PATH'),
+    'private_key_bri' => storage_path(env('BRI_PRIVATE_KEY_PATH')),
     'client_secret' => env('CLIENT_SECRET'),
     'patner_id' => env('PATNER_ID'),
     'x_partner_id' => env('X_PARTNER_ID'),

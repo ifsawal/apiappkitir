@@ -17,7 +17,7 @@ class R
     }
     public static function gagal(
         string $pesan,
-        int $statusCode = 404
+        int $statusCode = 400
     ): JsonResponse {
         return response()->json([
             'status' => false,
