@@ -58,6 +58,17 @@ return [
             'ignore_exceptions' => false,
         ],
 
+        'bri' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/bri.log'),
+            'level' => 'debug',
+        ],
+        'bri_notif' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/bri_notif.log'),
+            'level' => 'debug',
+        ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
@@ -89,7 +100,7 @@ return [
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
+                'connectionString' => 'tls://' . env('PAPERTRAIL_URL') . ':' . env('PAPERTRAIL_PORT'),
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],

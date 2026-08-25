@@ -20,4 +20,9 @@ class KitirPenjualan extends Model
     {
         return $this->hasOne(KitirPenjualanBriva::class, 'kitir_penjualan_ID', 'id');
     }
+
+    public function kitir_pecah()
+    {
+        return $this->hasMany(KitirPecah::class, 'kitir_penjualan_id', 'id');
+    }
 }

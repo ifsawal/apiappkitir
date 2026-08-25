@@ -1,0 +1,47 @@
+        $header = array(
+            "Content-Type:application/json",
+            "Authorization:Bearer " . $this->token,
+            "X-SIGNATURE:" . $tanda_tangan,
+            "X-PARTNER-ID:devlpg",
+            "X-TIMESTAMP:" . $this->timestamp,
+            "CHANNEL-ID:22235",
+            "X-EXTERNAL-ID:2223554545",
+        );
+        
+        $jsonBody = empty($body) ? json_encode(new stdClass()) : json_encode($body, true);
+
+        
+        $cupost = curl_init(); //kirim
+        curl_setopt($cupost, CURLOPT_URL, $this->baseUrl . $path);
+        curl_setopt($cupost, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($cupost, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($cupost, CURLINFO_HEADER_OUT, true);
+        curl_setopt($cupost, CURLOPT_RETURNTRANSFER, True);
+        curl_setopt($cupost, CURLOPT_POSTFIELDS, $jsonBody);
+        $hasil = curl_exec($cupost);
+        curl_close($cupost);
+        return $hasil;
+
+
+            public function testBuatSignaturAkses(array $body, string $path, string $method = 'POST')
+    {
+        $jsonBody = empty($body) ? json_encode(new stdClass()) : json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        $bodyHash = hash('sha256', $jsonBody);
+        $token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxNjYyOWE3MC1hNDg3LTRlZmEtOGI3NC0xM2Q4OTE0MjA5ZTciLCJjbGllbnRJZCI6ImI5ZjY3MTkxMmQxMzQ1ZWY5NjZmODFlMDA3YmM5NzhhIiwibmJmIjoxNzgxNzUxMTExLCJleHAiOjE3ODE3NTIwMTEsImlhdCI6MTc4MTc1MTExMX0.eGWUzbHBVP9PGivplgrVn7xfSRpw5egAluBRZrBiNEo";
+        $timestamp = "2020-01-01T00:00:00+07:00";
+
+        $stringToSign =
+            strtoupper($method) . ':' .
+            "$path" . ':' .
+            $token . ':' .
+            strtolower($bodyHash) . ':' .
+            $timestamp;
+
+        // generate HMAC SHA512
+        return $signature = base64_encode(hash_hmac(
+            'sha512',
+            $stringToSign,
+            "A557tGZnl+nT+AtQRQHZ+CXbAAmSqqGOpo5qIMnfH7g=",
+            true,
+        )) . "----------" . config('pembayaran.client_secret');
+    }

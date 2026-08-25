@@ -29,12 +29,14 @@ class OnesignalController extends Controller
     }
 
     public function waktu(){
-        
+        $t=Carbon::now();
+        return ($t->format('Y-m-d H:i:s'));
+        dd($t);
         return response()
             ->json([
                 'sukses' => true,
                 'waktu' => date('Y-m-d H:i:s'),
-                'waktu2' => Carbon::now(),
+                'waktu2' => $t,
             ], 201);
     }
 }

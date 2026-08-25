@@ -14,6 +14,39 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+
+    public function login_bersama(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|max:255|email',
+            'password' => 'required|string|min:4',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 428);
+        }
+
+        // Coba login sebagai pangkalan
+        if (Auth::guard('pangkalan2')->validate(
+            $request->only('email', 'password')
+        )) {
+            return $this->login_pangkalan($request);
+        }
+
+        // Kalau bukan pangkalan, coba login sebagai admin/user
+        if (Auth::guard('api')->validate(
+            $request->only('email', 'password')
+        )) {
+            return $this->login($request);
+        }
+
+        // Keduanya gagal
+        return response()->json([
+            'sukses' => false,
+            'pesan' => 'Login gagal...'
+        ], 401);
+    }
+
     public function login_pangkalan(Request $request)
     {
 
@@ -27,8 +60,7 @@ class AuthController extends Controller
 
 
         if (!Auth::guard('pangkalan2')->attempt($request->only('email', 'password'))) {
-            return response()
-                ->json(['sukses' => false, 'pesan' => 'Login gagal...'], 401);
+            return response()->json(['sukses' => false, 'pesan' => 'Login gagal...'], 401);
         }
 
         $user = Auth::guard('pangkalan2')->user();
@@ -36,6 +68,7 @@ class AuthController extends Controller
         $pangkalan = Pangkalan::where('id_pang', $user->pangkalan_id)->first();
         // $pangkalan = Pangkalan2::where('email', $r->email)->first();
         if (isset($request->player_id)) {
+            OnesignalLogin::where('player_id', $request->player_id)->delete();
             $one = new OnesignalLogin();
             $one->user_id = $user->id;
             $one->player_id = $request->player_id;
@@ -43,10 +76,12 @@ class AuthController extends Controller
             $one->save();
         }
 
+        $user->tokens()->delete();
         $token = $user->createToken('auth_token', ['pangkalan2'])->plainTextToken;
         return response()
             ->json([
                 'pesan' => "Login Berhasil...",
+                'jenis' => "pangkalan",
                 'token' => $token,
                 'user' => $user->name,
                 'detil' => [
@@ -138,10 +173,13 @@ if (btn) {
                 ->all();
         });
 
-        $pangkalan = Pangkalan::all();
+        $drivers = User::role('Driver', 'web')->select('id', 'name')->get();
+
+        $pangkalan = Pangkalan::orderBy('nama', 'asc')->get();
         $a = PangkalanResource::collection($pangkalan);
 
         if (isset($request->player_id)) {
+            OnesignalLogin::where('player_id', $request->player_id)->delete();
             $one = new OnesignalLogin();
             $one->user_id = $user->id;
             $one->player_id = $request->player_id;
@@ -149,14 +187,17 @@ if (btn) {
             $one->save();
         }
 
+        $user->tokens()->delete();
         $token = $user->createToken('auth_token', ['admin'])->plainTextToken;
         return response()
             ->json([
                 'pesan' => "Login Berhasil",
+                'jenis' => "admin",
                 'token' => $token,
                 'role' => $role,
                 'permisi' => $permisi,
                 'user' => $user->name,
+                'driver' => $drivers,
                 'pangkalan' => $a
             ], 202);
     }
@@ -167,7 +208,7 @@ if (btn) {
     {
 
         $user = Auth::user();
-        OnesignalLogin::where('user_id', $user->id)//di abaykan jika data.a tidak ada
+        OnesignalLogin::where('user_id', $user->id) //di abaykan jika data.a tidak ada
             ->where('model', User::class)
             ->delete();
 

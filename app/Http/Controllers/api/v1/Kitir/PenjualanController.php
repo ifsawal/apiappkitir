@@ -9,9 +9,12 @@ use App\Http\Controllers\Controller;
 
 class PenjualanController extends Controller
 {
-        public function penjualan(Request $r, $tanggal)
+        public function penjualan(Request $r, $tanggal=null)
     {
-        $tanggal = date('Y-m-d', strtotime($tanggal));
+        if($tanggal==null){$tanggal = date('Y-m-d');}   
+
+        $tanggal==null?$tanggal=date('Y-m-d'):$tanggal=date('Y-m-d', strtotime($tanggal));
+        
         $r->merge(['tanggal' => $tanggal]);
         $r->validate([
             'tanggal' => 'required|date_format:Y-m-d',
@@ -26,7 +29,7 @@ class PenjualanController extends Controller
 
 
         return  $penjualan = KitirPenjualan::with('pangkalan:id_pang,nama', 'kitir_pecah:kitir_penjualan_id,id_k,jumlah', 'kitir_pecah.kitir_penjualan:id,id_pang,tanggal,jumlah', 'kitir_pecah.kitir_penjualan.kitir_penjualan_briva:id_briva,kitir_penjualan_ID,jumlah_bayar,status_bayar', 'kitir_pecah.kitir_penjualan.pangkalan:id_pang,nama')
-            ->where('tanggal', $tanggal)
+            ->whereDate('tanggal', $tanggal)
             ->get();
 
 
