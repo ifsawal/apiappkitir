@@ -20,6 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
             'permission.api' => \App\Http\Middleware\ApiPermissionMiddleware::class,
             'role.api' => RoleMiddleware::class,
+            'webhook.bri' => \App\Http\Middleware\WebhookBriMiddleware::class,
+        ]);
+        // Tambahkan ini 👇
+        $middleware->validateCsrfTokens(except: [
+            'snap/v1.0/access-token/b2b',
+            'oauth/token',
         ]);
     })
     // ->withProviders([

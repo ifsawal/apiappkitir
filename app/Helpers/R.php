@@ -24,11 +24,8 @@ class R
             'pesan' => $pesan,
         ], $statusCode);
     }
-    public static function data(
-        string $pesan,
-        mixed  $data,
-        int $statusCode = 200
-    ): JsonResponse {
+    public static function data(string $pesan, mixed $data, int $statusCode = 202)
+    {
         return response()->json([
             'status' => true,
             'pesan' => $pesan,

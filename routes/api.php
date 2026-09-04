@@ -3,6 +3,7 @@
 use App\Http\Controllers\api\v1\Akun\DataController;
 use App\Http\Controllers\api\v1\Akun\ProsesAkunController;
 use App\Http\Controllers\api\v1\Auth\AuthController;
+use App\Http\Controllers\api\v1\Auth\OauthController;
 use App\Http\Controllers\api\v1\Auth\OnesignalController;
 use App\Http\Controllers\api\v1\Kitir\DataPangkalanController;
 use App\Http\Controllers\api\v1\Kitir\KitirController;
@@ -69,6 +70,7 @@ Route::prefix('v1')->group(function () {
 
         //penjualan
         Route::post('/simpan-penjualan', [PenjualanPenjualanController::class, 'simpan_penjualan']);
+        Route::post('/catat', [PenjualanPenjualanController::class, 'catat']);
         Route::post('/hapus-penjualan', [PenjualanPenjualanController::class, 'hapus_penjualan']);
         Route::get('/ambil-penjualan', [PenjualanPenjualanController::class, 'ambil_penjualan']);
         Route::post('/penjualan-terakhir', [PenjualanPenjualanController::class, 'penjualan_terakhir']);
@@ -81,6 +83,12 @@ Route::prefix('v1')->group(function () {
         Route::post('/status-create', [PenjualanPenjualanController::class, 'status_create'])->middleware('permission.api:status create');
         Route::post('/cek-kewajiban', [PenjualanPenjualanController::class, 'cek_kewajiban']);
         Route::post('/daftar-transfer', [PenjualanPenjualanController::class, 'daftar_transfer']);
+
+        //Bank
+        Route::post('/report', [PembayaranController::class, 'report']);
+        Route::post('/inquiry', [PembayaranController::class, 'inquiry']);
+        Route::post('/create', [PembayaranController::class, 'create']);
+        Route::post('/delete', [PembayaranController::class, 'delete']);
 
 
         //Perubahan
@@ -107,10 +115,8 @@ Route::prefix('v1')->group(function () {
 
 
 
-    Route::post(config('pembayaran.url_notif_webhook'), [NotifikasiPembayaranController::class, 'notifikasi_bri']);
+    //Route::post(config('pembayaran.url_notif_webhook'), [NotifikasiPembayaranController::class, 'notifikasi_bri']);
 
     Route::post('/onesig', [OnesignalController::class, 'simpan_player']);
     Route::get('/waktu', [OnesignalController::class, 'waktu']);
-
-    
 });

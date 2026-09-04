@@ -65,15 +65,13 @@ class BRIServices
                 "value" => $jumlah,
                 "currency" => "IDR"
             ],
-            "expiredDate" => $expiredDate,
+            "expiredDate" => "$expiredDate",
             "additionalInfo" => [
                 "description" => $keterangan
             ]
         ];
-
         $jsonBody = json_encode($body);
-
-        $hit = Http::withHeaders([
+        $headers = [
             'Content-Type' => 'application/json',
             'Authorization' => "Bearer " . $this->token,
             'X-SIGNATURE' => $this->buatSignaturAkses($jsonBody, $path),
@@ -81,8 +79,33 @@ class BRIServices
             'X-TIMESTAMP' => $this->timestamp,
             'CHANNEL-ID' => '00002',
             'X-EXTERNAL-ID' => '334547',
-        ])->withBody($jsonBody, 'application/json')
+        ];
+
+        $hit = Http::withHeaders($headers)->withBody($jsonBody, 'application/json')
             ->post($this->baseUrl . $path);
+
+
+        // // Format log request 
+        // $curl = "curl --location '" . $this->baseUrl . $path . "' \\\n";
+        // foreach ($headers as $key => $value) {
+        //     $curl .= "--header '" . $key . ": " . $value . "' \\\n";
+        // }
+        // $curl .= "--data '" .
+        //     str_replace(
+        //         "'",
+        //         "'\\''",
+        //         json_encode(
+        //             $body,
+        //             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+        //         )
+        //     ) .
+        //     "'";
+        // Log::channel('bri')->info("CREATE VA\n\n" . $curl, [
+        //     'http_code' => $hit->status(),
+        //     'response'  => $hit->json(),
+        // ]);
+
+
 
         Log::channel('bri')->info('CREATE VA', [
             'url'        => $path,
@@ -184,7 +207,7 @@ class BRIServices
         ];
 
         $jsonBody = json_encode($body);
-        $hit = Http::withHeaders([
+        $headers = [
             'Content-Type' => 'application/json',
             'Authorization' => "Bearer " . $this->token,
             'X-SIGNATURE' => $this->buatSignaturAkses($jsonBody, $path),
@@ -192,8 +215,32 @@ class BRIServices
             'X-TIMESTAMP' => $this->timestamp,
             'CHANNEL-ID' => '00002',
             'X-EXTERNAL-ID' => '334547',
-        ])->withBody($jsonBody, 'application/json')
+        ];
+
+        $hit = Http::withHeaders($headers)->withBody($jsonBody, 'application/json')
             ->post($this->baseUrl . $path);
+
+        // // Format log request 
+        // $curl = "curl --location '" . $this->baseUrl . $path . "' \\\n";
+        // foreach ($headers as $key => $value) {
+        //     $curl .= "--header '" . $key . ": " . $value . "' \\\n";
+        // }
+        // $curl .= "--data '" .
+        //     str_replace(
+        //         "'",
+        //         "'\\''",
+        //         json_encode(
+        //             $body,
+        //             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+        //         )
+        //     ) .
+        //     "'";
+        // Log::channel('bri')->info("CREATE VA\n\n" . $curl, [
+        //     'http_code' => $hit->status(),
+        //     'response'  => $hit->json(),
+        // ]);
+
+
         return $hit;
     }
 
@@ -234,7 +281,7 @@ class BRIServices
         ];
 
         $jsonBody = json_encode($body);
-        $hit = Http::withHeaders([
+        $headers = [
             'Content-Type' => 'application/json',
             'Authorization' => "Bearer " . $this->token,
             'X-SIGNATURE' => $this->buatSignaturAkses($jsonBody, $path),
@@ -242,8 +289,33 @@ class BRIServices
             'X-TIMESTAMP' => $this->timestamp,
             'CHANNEL-ID' => '00002',
             'X-EXTERNAL-ID' => '334547',
-        ])->withBody($jsonBody, 'application/json')
+        ];
+
+        $hit = Http::withHeaders($headers)->withBody($jsonBody, 'application/json')
             ->post($this->baseUrl . $path);
+
+        // // Format log request 
+        // $curl = "curl --location '" . $this->baseUrl . $path . "' \\\n";
+        // foreach ($headers as $key => $value) {
+        //     $curl .= "--header '" . $key . ": " . $value . "' \\\n";
+        // }
+        // $curl .= "--data '" .
+        //     str_replace(
+        //         "'",
+        //         "'\\''",
+        //         json_encode(
+        //             $body,
+        //             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+        //         )
+        //     ) .
+        //     "'";
+        // Log::channel('bri')->info("CREATE VA\n\n" . $curl, [
+        //     'http_code' => $hit->status(),
+        //     'response'  => $hit->json(),
+        // ]);
+
+
+
         return $hit;
     }
 
@@ -304,6 +376,9 @@ class BRIServices
             $expired = $result['expiresIn'];
 
             Cache::put('bri_token', $token, now()->addSeconds($expired - 120));
+
+
+
             return $token;
         } catch (\Throwable $e) {
             logger()->error('Gagal ambil token BRI', [

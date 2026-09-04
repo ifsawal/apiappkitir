@@ -116,7 +116,40 @@ class PenjualanController extends Controller
         });
     }
 
+    public function catat(Request $r)
+    {
+        $r->validate([
+            'id' => 'required|numeric|exists:a_penjualans,id',
+            'catatan' => 'required|string',
+        ]);
+        $penjualan = APenjualan::findOrFail($r->id);
+        $catatanLama = $penjualan->keterangan;
 
+        if ($penjualan->created_at->isToday()) {
+            $penjualan->keterangan = $r->catatan;
+            $penjualan->save();
+
+            return R::sukses('Sukses diupdate');
+        }
+
+        if (empty($catatanLama)) {
+            $penjualan->keterangan = $r->catatan;
+            $penjualan->save();
+            return R::sukses('Sukses disimpan', 202);
+        }
+
+        if (!str_starts_with($r->catatan, $catatanLama)) {
+            return R::gagal('Catatan lama tidak sesuai');
+        }
+
+        if ($r->catatan === $catatanLama) {
+            return R::gagal('Catatan tidak berubah');
+        }
+
+        $penjualan->keterangan = $r->catatan;
+        $penjualan->save();
+        return R::sukses('Sukses di tambahkan');
+    }
     public function hapus_penjualan(Request $r)
     {
         $r->validate([
@@ -382,7 +415,7 @@ class PenjualanController extends Controller
         // });
         // return $r->do_id ?? null;
 
-        $penjualan = APenjualan::select('id', 'jumlah_tabung', 'total_harga', 'status_bayar', 'created_at', 'pangkalan2_id', 'selesai_antar', 'status_create_briva','keterangan')
+        $penjualan = APenjualan::select('id', 'jumlah_tabung', 'total_harga', 'status_bayar', 'created_at', 'pangkalan2_id', 'selesai_antar', 'status_create_briva', 'keterangan')
             ->when($r->do_id, function ($q) use ($r) {
                 $q->whereHas('detil', function ($query) use ($r) {
                     $query->where('do_id', $r->do_id);

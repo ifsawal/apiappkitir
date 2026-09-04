@@ -1,6 +1,13 @@
 <?php
 
 return [
+
+
+    'BRI_NOTIF_CLIENT_ID' => env('BRI_NOTIF_CLIENT_ID'),
+    'BRI_NOTIF_CLIENT_SECRET' => env('BRI_NOTIF_CLIENT_SECRET'),
+    'BRI_NOTIF_TOKEN_EXPIRES' => env('BRI_NOTIF_TOKEN_EXPIRES'),
+    'BRI_NOTIF_public_key_bri' => storage_path(env('BRI_NOTIF_BRI_PUBLIC_KEY_PATH')),
+
     'base_url' => env('BRI_BASE_URL'),
     'client_id' => env('X_CLIENT_KEY'),
     // 'private_key_bri' => env('BRI_PRIVATE_KEY_PATH'),
