@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\api\v1\Pangkalan;
 
+use App\Helpers\R;
 use App\Http\Controllers\Controller;
-use App\Models\ADo;
 use App\Models\APenjualan;
-use App\Models\APenjualanDetil;
+use App\Services\BRIServicesEksekusi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -44,21 +44,24 @@ class TransaksiV2Controller extends Controller
         ], 202);
     }
 
-    public function cek_status_pangkalan(Request $r)
+    public function cek_status_pangkalan(Request $r, BRIServicesEksekusi $briEksekusi)
     {
         $r->validate([
-            'id' => 'required|numeric',
+            'id' => 'required|numeric|exists:a_penjualans,id',
         ]);
 
         $penjualan = APenjualan::select('id', 'jumlah_tabung', 'total_harga', 'status_bayar', 'created_at', 'pangkalan2_id', 'selesai_antar', 'status_create_briva', 'keterangan')
-            ->where('status_bayar', "N")
             ->where('id', $r->id)
             ->first();
 
+        if ($penjualan->status_bayar == 'Y') return R::gagal('Sudah dibayar');
+
+
+        $respon = $briEksekusi->cekStatusBriva($r->id);
 
         return response()->json([
             'status' => true,
-            'pesan' => 'Sistem sedang dalam pengembangan.',
+            'pesan' => "Status Pembayaran Anda : " . $respon,
 
         ], 202);
     }

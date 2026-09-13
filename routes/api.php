@@ -83,12 +83,15 @@ Route::prefix('v1')->group(function () {
         Route::post('/status-create', [PenjualanPenjualanController::class, 'status_create'])->middleware('permission.api:status create');
         Route::post('/cek-kewajiban', [PenjualanPenjualanController::class, 'cek_kewajiban']);
         Route::post('/daftar-transfer', [PenjualanPenjualanController::class, 'daftar_transfer']);
+        Route::post('/notif-penjualan', [PenjualanPenjualanController::class, 'notif']);
+        Route::post('/notif-wa', [PenjualanPenjualanController::class, 'notif_wa']);
 
         //Bank
         Route::post('/report', [PembayaranController::class, 'report']);
         Route::post('/inquiry', [PembayaranController::class, 'inquiry']);
         Route::post('/create', [PembayaranController::class, 'create']);
         Route::post('/delete', [PembayaranController::class, 'delete']);
+        Route::post('/tes-transfer', [PembayaranController::class, 'tes_transfer']);
 
 
         //Perubahan

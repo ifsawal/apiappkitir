@@ -73,6 +73,7 @@ class NotifServices
                     'priority' => 'high',
                     'notification' => [
                         'sound' => 'default',
+                        'color' => '#FF5733',
                     ],
                 ],
             ],

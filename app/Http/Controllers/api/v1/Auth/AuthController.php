@@ -187,7 +187,7 @@ if (btn) {
             $one->save();
         }
 
-        $user->tokens()->delete();
+        // $user->tokens()->delete();
         $token = $user->createToken('auth_token', ['admin'])->plainTextToken;
         return response()
             ->json([

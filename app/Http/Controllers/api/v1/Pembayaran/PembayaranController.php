@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\api\v1\Pembayaran;
 
+use App\Exceptions\GagalE;
 use App\Helpers\R;
 use App\Http\Controllers\Controller;
+use App\Models\APenjualan;
 use App\Services\BRIResponService;
 use App\Services\BRIServices;
 use Carbon\Carbon;
@@ -16,14 +18,33 @@ class PembayaranController extends Controller
     public function index(BRIServices $service)
     {
         // return $service->getToken();
-        return $service->create("554506","iwan 34", "c4455", "2");
+        // return $service->create("554507","iwan 34", "c4456", "20000");
+        return $service->transferVA('554498111', "Jokul Doe", "001901000032531", "abcdefgh1234", "100000.00");
+        return $service->updateStatusVA("99925", "c555127", "Y");
         // return $service->updateVA("554492","Sawal 8", "uv4456", "10245","peruhan ke 3");
-        // return $service->updateStatusVA("554492", "us4455", "Y");
-        return $service->inquiryVA("55450645", "c4455");
-        // return $service->deleteVA("554506");
-        return $service->status("554495", "11232");
-        // return $service->status("99917", "11232");
-        return $service->laporan("2026-08-18");
+        // return $service->inquiryVA("99956", "c555121");
+        // return $service->deleteVA("99925");
+        return $service->status("99956", "c555121");
+        return $service->laporan("2026-09-07");
+    }
+
+    public function tes_transfer(Request $r, BRIServices $service, BRIResponService $brivaResponse)
+    {
+        
+        $r->validate([
+            'id_penjualan' => 'required|numeric|exists:a_penjualans,id',
+        ]);
+
+        if(!app()->isLocal()) throw new GagalE('Gagal, Akses hanya bisa di lakukan di local', 400);
+        $data = APenjualan::with('pangkalan2', 'pangkalan2.pangkalan')->where('id', $r->id_penjualan)->first();
+
+        $create = $service->transferVA($data->pangkalan2->pangkalan->no_briva, $data->pangkalan2->name, "001901000032531", "c555" . $r->id_penjualan, $data->total_harga . ".00");
+        $update = $service->updateStatusVA($data->pangkalan2->pangkalan->no_briva, "c555" . $r->id_penjualan, "Y");
+        return response()->json([
+            'status' => 'sukses',
+            'data' => $brivaResponse->respon_briva($create),
+            'update' => $update->respon_briva($update),
+        ]);
     }
 
     public function status(Request $r, BRIServices $service, BRIResponService $brivaResponse)

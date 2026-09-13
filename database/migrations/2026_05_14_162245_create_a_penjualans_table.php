@@ -22,7 +22,9 @@ return new class extends Migration
             $table->string('keterangan')->nullable();
             $table->integer('selesai_antar')->nullable()->comment('1=sudah');
             $table->integer('status_create_briva')->nullable()->comment('1=sudah');
-
+            $table->text('manual_cek')->nullable();
+            $table->string('sumber_status')->nullable();
+            $table->dateTime('tanggal_tf')->nullable();
 
 
 

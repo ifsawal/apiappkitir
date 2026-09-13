@@ -30,6 +30,8 @@ class BRIServices
         $this->token = $this->getToken();
     }
 
+    //$waktu = Carbon::now()->format('Y-m-d\TH:i:sP');  contoh yang ke 2
+
     public function buatSignaturToken()
     {
         $stringToSign = $this->clientId . '|' . $this->timestamp;
@@ -117,7 +119,40 @@ class BRIServices
     }
 
 
+    public function transferVA(string $customer_no, $nama, $rekening, $no_referensi, $jumlah)
+    {
+        $path = "/snap/v1.0/transfer-va/payment-intrabank";
+        $waktu = Carbon::now()->format('Y-m-d\TH:i:sP');
+        $body = [
+            "partnerServiceId" => "   " . $this->patner_id,
+            "customerNo" => $customer_no,
+            "virtualAccountNo" => "   " . $this->patner_id . $customer_no,
+            "virtualAccountName" => $nama,
+            "sourceAccountNo" => $rekening,
+            "partnerReferenceNo" => $no_referensi,
+            "trxDateTime" => $waktu,
+            "paidAmount" => [
+                "value" => $jumlah,
+                "currency" => "IDR"
+            ],
+        ];
 
+        $jsonBody = json_encode($body);
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Authorization' => "Bearer " . $this->token,
+            'X-SIGNATURE' => $this->buatSignaturAkses($jsonBody, $path),
+            'X-PARTNER-ID' => $this->x_partner_id,
+            'X-TIMESTAMP' => $this->timestamp,
+            'CHANNEL-ID' => '00002',
+            'X-EXTERNAL-ID' => '334547',
+        ];
+
+        $hit = Http::withHeaders($headers)->withBody($jsonBody, 'application/json')
+            ->post($this->baseUrl . $path);
+
+        return $hit;
+    }
 
 
     public function updateVA(string $customer_no, string $nama, string $transaksi_id, string $jumlah, string $keterangan = "-")

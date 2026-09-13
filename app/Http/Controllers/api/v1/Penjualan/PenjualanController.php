@@ -10,11 +10,15 @@ use App\Models\ADo;
 use App\Models\APenjualan;
 use App\Models\APenjualanDetil;
 use App\Models\ASeting;
+use App\Models\OnesignalLogin;
 use App\Models\Pangkalan2;
 use App\Services\BRIResponService;
 use App\Services\BRIServices;
+use App\Services\BRIServicesEksekusi;
+use App\Services\NotifServices;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -57,6 +61,12 @@ class PenjualanController extends Controller
             if ($hitung_penjualan == $do->jumlah) throw new GagalE('DO / Kitir habis', 400);
             if ($hitung_penjualan_dan_input > $do->jumlah) throw new GagalE('DO / Kitir tidak cukup .' . $sisa . ' tabung tersisa.', 400);
 
+            // $cekdoble = APenjualan::where('pangkalan2_id', $r->pangkalan_id)
+            //     ->whereDate('created_at', Carbon::today())
+            //     ->where('total_harga', $r->jumlah * $seting['harga'])
+            //     ->get();
+            // if ($cekdoble->count() > 0) throw new GagalE('Penjualan dengan jumlah yang sama sudah ada dihari ini', 400);
+
             $pesan_briva = "";
             if (isset($r->tambahan)) { //tambahan itu isinya id _penjualan yang mau di tambah
                 $r->validate([
@@ -69,6 +79,12 @@ class PenjualanController extends Controller
                 $a->jumlah_tabung = $a->jumlah_tabung + $r->jumlah;
                 $a->total_harga = $a->total_harga + ($r->jumlah * $seting['harga']);
                 $a->save();
+
+                // $cekdoble_tambah = APenjualan::where('pangkalan2_id', $r->pangkalan_id)
+                //     ->whereDate('created_at', Carbon::today())
+                //     ->where('total_harga', $a->total_harga)
+                //     ->get();
+                // if ($cekdoble_tambah->count() > 1) throw new GagalE('Penjualan dengan jumlah yang sama sudah ada dihari ini.', 400);
 
                 $detil = APenjualanDetil::where('penjualan_id', $a->id)->where('do_id', $r->do_id)->first(); //mengecek apakah sudah ada input detil
                 if ($detil) {
@@ -198,9 +214,55 @@ class PenjualanController extends Controller
         return R::sukses('Pengantaran LPG dibatalkan', 201);
     }
 
+    public function notif_wa(Request $r)
+    {
+        $r->validate([
+            'id' => 'required|numeric|exists:a_penjualans,id',
+        ]);
 
 
+        $penjualan = APenjualan::where('id', $r->id)->first();
+        $data = Pangkalan2::with('pangkalan')->where('id', $penjualan->pangkalan2_id)->first();
 
+        if ($penjualan->status_bayar == "Y") return R::gagal('Pembayaran sudah dilakukan');
+        $pesan = "Tagihan kepada *" . $data->name . "* 
+Tanggal : " . $penjualan->created_at->format('d-m-Y') . "
+Jumlah Tabung : " . $penjualan->jumlah_tabung . " Tbg. 
+Harga : Rp. " . number_format($penjualan->total_harga, 0, ',', '.') . "
+No Rek Briva : " . config('pembayaran.patner_id') ." ". $data->pangkalan->no_briva . "
+
+Berdasarkan data di sistem adalah *BELUM LUNAS*. Silahkan langsung di transfer, kemudian cek statusnya di aplikasi. 
+
+Demikian, terimakasih. 
+        ";
+        return response()->json([
+            'status' => true,
+            'nowa' => ltrim($data->nohp, '0'),
+            'pesan' => $pesan,
+        ], 202);
+    }
+
+
+    public function notif(Request $r, NotifServices $notif)
+    {
+        $r->validate([
+            'id' => 'required|numeric|exists:a_penjualans,id',
+        ]);
+
+        $penjualan = APenjualan::where('id', $r->id)->first();
+        $data = Pangkalan2::where('id', $penjualan->pangkalan2_id)->first();
+        $data_fcm = OnesignalLogin::where('user_id', $data->id)->first();
+        if (!$data_fcm) {
+            return R::gagal('User belum terdaftar', 400);
+        }
+        $pesan = "Pembelian LPG 3 KG sejumlah : " . $penjualan->jumlah_tabung . " Rp. " . number_format($penjualan->total_harga) . " pada tanggal : " . $penjualan->created_at->format('d-m-Y') . " Status Pembayaran : " . $penjualan->status_bayar;
+        $notif->kirimFCM($data_fcm->player_id, 'Pembelian LPG', $pesan, [
+            'transaksi_id' => '',
+            'jenis' => 'pembayaran',
+        ]);
+
+        return R::sukses('Terkirim...', 201);
+    }
 
 
 
@@ -211,11 +273,19 @@ class PenjualanController extends Controller
             'id' => 'required|numeric|exists:a_penjualans,id',
         ]);
         return DB::transaction(function () use ($r, $bri) {
-            // $cek = APenjualan::where('status_bayar', 'N')->get();
-            // if($cek->count() > 0) throw new GagalE('Gagal, masih ada penjualan yang belum dibayar...', 404);
             $data = APenjualan::with('pangkalan2', 'pangkalan2.pangkalan')->where('id', $r->id)->first();
-            if ($data->selesai_antar == null) throw new GagalE('Gagal, status belum diantar...', 400);
+            $cek = APenjualan::where('status_bayar', 'N')
+                ->where('pangkalan2_id', $data->pangkalan2_id)
+                ->where('created_at', '<', $data->created_at)
+                ->exists();
+            if ($cek) throw new GagalE('Gagal, masih ada penjualan yang belum dibayar...', 404);
+            // if ($data->selesai_antar == null) throw new GagalE('Gagal, status belum diantar...', 400);
+            if ($data->selesai_antar == null) {
+                $data->selesai_antar = 1;
+                $data->save();
+            }
             if ($data->status_create_briva == 1) throw new GagalE('Gagal, karena karena sudah tertagih...', 400);
+            $data->pangkalan2->pangkalan->no_briva;
             $briva = $bri->create($data->pangkalan2->pangkalan->no_briva, $data->pangkalan2->name, "c555" . $data->id, $data->total_harga, "LPG 3 Kg sejumlah " . $data->jumlah_tabung);
             $this->respon_briva($briva); //PROSES CREATE BRIVA
             $update = APenjualan::where('id', $r->id)->first();
@@ -247,19 +317,14 @@ class PenjualanController extends Controller
     }
 
 
-    public function status_tagihan(Request $r, BRIServices $bri)
+    public function status_tagihan(Request $r,  BRIServicesEksekusi $briEksekusi)
     {
         $r->validate([
             'id' => 'required|numeric|exists:a_penjualans,id',
         ]);
-        $data = APenjualan::with('pangkalan2', 'pangkalan2.pangkalan')->where('id', $r->id)->first();
-        if ($data->selesai_antar == null) return R::gagal('Status sebagai draf...');
-        if ($data->status_create_briva == null) return R::gagal('Status, belum ditagih...');
-        // if ($data->status_bayar == "Y") return R::gagal('Status DB sudah dibayar...');
-        $briva = $bri->status($data->pangkalan2->pangkalan->no_briva, 'c555' . $data->id);
-        // $briva = $bri->status("554495", 'c555' . $data->id);
-        $respon = $this->respon_briva($briva);
-        return R::sukses("Status pembayaran : " . $respon->additionalInfo->paidStatus, 202);
+        $respon = $briEksekusi->cekStatusBriva($r->id);
+
+        return R::sukses("Status pembayaran : " . $respon, 202);
     }
 
     public function status_create(Request $r, BRIServices $bri)
@@ -278,9 +343,12 @@ class PenjualanController extends Controller
     public function informasi_umum(Request $r)
     {
         $r->validate([
-            'id' => 'required|numeric|exists:pangkalan2s,id',
+            'id' => 'required|numeric|exists:a_penjualans,id',
         ]);
-        $data = Pangkalan2::with('pangkalan')->where('id', $r->id)->first();
+
+        $penjualan = APenjualan::where('id', $r->id)->first();
+
+        $data = Pangkalan2::with('pangkalan')->where('id', $penjualan->pangkalan2_id)->first();
         $data->pangkalan->no_briva = config('pembayaran.patner_id') . $data->pangkalan->no_briva;
         return response()->json([
             'status' => true,
@@ -309,78 +377,23 @@ class PenjualanController extends Controller
         ], 202);
     }
 
-    public function daftar_transfer(Request $r, BRIServices $bri)
+    public function daftar_transfer(Request $r, BRIServicesEksekusi $briEksekusi)
     {
-
         $r->merge([
             'tanggal' => \Carbon\Carbon::parse($r->tanggal)->format('Y-m-d')
         ]);
         $r->validate([
             'tanggal' => 'required|date:Y-m-d'
         ]);
-
-        $briva = $bri->laporan($r->tanggal);
-        $respon = $this->respon_briva($briva);
-
-        $kodeTransaksi = collect($respon->virtualAccountData)
-            ->map(function ($item) {
-                return hash('sha256', trim($item->virtualAccountNo) . '|' . $item->totalAmount->value . '|' . $item->trxDateTime);
-            })->all();
-        $trxSudahAda = ABriva::whereIn('kode_transaksi', $kodeTransaksi)->pluck('kode_transaksi')->flip();
-
-
-        foreach ($respon->virtualAccountData as $item) {
-            $kode = hash('sha256', trim($item->virtualAccountNo) . '|' . $item->totalAmount->value . '|' . $item->trxDateTime);
-            if ($trxSudahAda->has($kode)) {
-                continue;
-            }
-
-            DB::transaction(function () use ($item, $kode, $bri) {
-
-                $penjualan = APenjualan::whereHas('pangkalan2.pangkalan', function ($q) use ($item) {
-                    $q->where('no_briva', $item->customerNo);
-                })
-                    ->where('status_create_briva', 1)
-                    ->where('status_bayar', "N")
-                    ->where('total_harga', (int) $item->totalAmount->value)
-                    ->get();
-
-                if ($penjualan->count() === 1) {
-                    $data = $penjualan->first();
-                    $data->status_bayar = "Y";
-                    $data->metode_bayar = "Transfer VA";
-                    $data->save();
-                } else {
-                    throw new GagalE($item->customerNo . "-" . $item->virtualAccountName . "-" . $item->totalAmount->value . " Tidak ditemukan", 400);
-                }
-                $hapus_briva = $bri->deleteVA($item->customerNo);
-                $respon = $this->respon_briva($hapus_briva);
-                if ($respon->responseCode != "2003100") throw new GagalE($item->customerNo . "-" . $item->virtualAccountName . "-" . $item->totalAmount->value . " BRIVA Gagal di hapus", 400);
-
-
-                $briva = new ABriva();
-                $briva->data = $item;
-                $briva->customerNo = trim($item->customerNo);
-                $briva->virtualAccountNo = trim($item->virtualAccountNo);
-                $briva->value = $item->totalAmount->value;
-                $briva->trxDateTime = $item->trxDateTime;
-                $briva->virtualAccountName = $item->virtualAccountName;
-                $briva->trxId = $item->trxId;
-                $briva->description = $item->additionalInfo->description;
-                $briva->sourceAccountVa = $item->additionalInfo->sourceAccountVa;
-                $briva->tellerId = $item->additionalInfo->tellerId;
-                $briva->kode_transaksi = $kode;
-                $briva->penjualan_id = $data->id;
-                $briva->save();
-            });
-        }
-
+        $bri = $briEksekusi->prosesReport($r->tanggal);
 
         return response()->json([
             'status' => true,
-            'data' => $respon->virtualAccountData,
+            'data' => $bri,
         ], 202);
     }
+
+
     public function penjualan_terakhir(Request $r)
     {
         $r->validate([
@@ -415,7 +428,7 @@ class PenjualanController extends Controller
         // });
         // return $r->do_id ?? null;
 
-        $penjualan = APenjualan::select('id', 'jumlah_tabung', 'total_harga', 'status_bayar', 'created_at', 'pangkalan2_id', 'selesai_antar', 'status_create_briva', 'keterangan')
+        $penjualan = APenjualan::select('id', 'jumlah_tabung', 'total_harga', 'status_bayar', 'created_at', 'pangkalan2_id', 'selesai_antar', 'status_create_briva', 'keterangan', 'manual_cek', 'sumber_lunas', 'tanggal_tf')
             ->when($r->do_id, function ($q) use ($r) {
                 $q->whereHas('detil', function ($query) use ($r) {
                     $query->where('do_id', $r->do_id);
